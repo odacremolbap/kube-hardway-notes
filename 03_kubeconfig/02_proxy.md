@@ -9,7 +9,7 @@ mkdir -p ./gen
 kubectl config set-cluster hardway \
   --certificate-authority ${CERTS_PATH}/ca.pem \
   --embed-certs=true \
-  --server=https://${APISERVER_ADDRESS}:6433 \
+  --server=https://${APISERVER_ADDRESS}:6443 \
   --kubeconfig=./gen/proxy.kubeconfig
 
 kubectl config set-credentials system:node-proxier \

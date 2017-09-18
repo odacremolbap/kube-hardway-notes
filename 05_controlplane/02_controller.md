@@ -11,6 +11,7 @@ Documentation=https://kubernetes.io
 [Service]
 ExecStart=/usr/local/bin/kube-controller-manager \\
   --address=0.0.0.0 \\
+  --allocate-node-cidrs=true \\
   --cluster-cidr=10.2.0.0/16 \\
   --cluster-name=kubernetes \\
   --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \\
