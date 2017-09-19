@@ -18,6 +18,7 @@ Documentation=https://kubernetes.io
 ExecStart=/usr/local/bin/kube-apiserver \\
   --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
   --advertise-address=${INTERNAL_IP} \\
+  --kubelet-preferred-address-types=InternalIP \\
   --allow-privileged=true \\
   --apiserver-count=1 \\
   --audit-log-maxage=30 \\
