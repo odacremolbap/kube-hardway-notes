@@ -245,3 +245,63 @@ spec:
     type: RollingUpdate
 EOF
 ```
+
+Calico policy controller
+(at master! check the etcd location, nodeselector, volume mounts ...)
+```
+cat <<EOF | kubectl create -f -
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: calico-policy-controller
+  namespace: kube-system
+  labels:
+    k8s-app: calico-policy
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: ''
+    scheduler.alpha.kubernetes.io/tolerations: |
+      [{"key": "dedicated", "value": "master", "effect": "NoSchedule" },
+       {"key":"CriticalAddonsOnly", "operator":"Exists"}]
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: calico-policy-controller
+      namespace: kube-system
+      labels:
+        k8s-app: calico-policy
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        kubernetes.io/hostname: kube-01
+      containers:
+        - name: calico-policy-controller
+          image: calico/kube-policy-controller:v0.5.2
+          env:
+            # The location of the Calico etcd cluster.
+            - name: ETCD_ENDPOINTS
+              value: "https://10.132.109.203:2379"
+            - name: ETCD_CA_CERT_FILE
+              value: /calico-secrets/ca.pem
+            - name: ETCD_KEY_FILE
+              value: /calico-secrets/apiserver-key.pem
+            # Location of the client certificate for etcd.
+            - name: ETCD_CERT_FILE
+              value: /calico-secrets/apiserver.pem
+            - name: K8S_API
+              value: "https://kubernetes.default:443"
+            - name: CONFIGURE_ETC_HOSTS
+              value: "true"
+          volumeMounts:
+            # Mount in the etcd TLS secrets.
+            - mountPath: /calico-secrets
+              name: etcd-certs
+      volumes:
+        # Mount in the etcd TLS secrets.
+        - name: etcd-certs
+          hostPath:
+            path: /var/lib/kubernetes
+EOF
+```
